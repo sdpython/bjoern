@@ -27,14 +27,16 @@ size_t unquote_url_inplace(char* url, size_t len)
   return len;
 }
 
+
 void _init_common()
 {
 
 #define _(name) _##name = _PEP3333_String_FromUTF8String(#name)
+#define _py(name) _py##name = _PEP3333_String_FromUTF8String(#name)
   _(REMOTE_ADDR);
   _(PATH_INFO);
   _(QUERY_STRING);
-  _(close);
+  _py(close);
 
   _(REQUEST_METHOD);
   _(SERVER_PROTOCOL);
@@ -49,8 +51,8 @@ void _init_common()
   _(http);
 
   _(BytesIO);
-  _(write);
-  _(read);
+  _py(write);
+  _py(read);
   _(seek);
 #undef _
 

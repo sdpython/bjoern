@@ -394,7 +394,11 @@ wrap_http_chunk_cruft_around(PyObject* chunk)
    * but hexadecimal representation for chunk lengths btw!?! Fuck W3C */
   size_t chunklen = _PEP3333_Bytes_GET_SIZE(chunk);
   assert(chunklen);
+#if defined(_MSC_VER)
+  char *buf = _alloca(strlen("ffffffff") + 2);
+#else
   char buf[strlen("ffffffff") + 2];
+#endif
   size_t n = sprintf(buf, "%x\r\n", (unsigned int)chunklen);
   PyObject* new_chunk = _PEP3333_Bytes_FromStringAndSize(NULL, n + chunklen + 2);
   char * new_chunk_p = (char *)_PEP3333_Bytes_AS_DATA(new_chunk);

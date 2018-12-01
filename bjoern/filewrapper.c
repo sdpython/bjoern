@@ -52,7 +52,7 @@ FileWrapper_Iter(PyObject* self)
 static PyObject*
 FileWrapper_IterNext(PyObject* self)
 {
-  PyObject* data = PyObject_CallMethodObjArgs(FW_self->file, _read, FW_self->blocksize, NULL);
+  PyObject* data = PyObject_CallMethodObjArgs(FW_self->file, _pyread, FW_self->blocksize, NULL);
   if (data != NULL && PyObject_IsTrue(data)) {
     return data;
   } else {

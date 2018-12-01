@@ -1,4 +1,4 @@
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
 #include <fcntl.h>
 #include <ev.h>
 
@@ -8,8 +8,17 @@
 # include <sys/socket.h>
 #endif
 
+#if defined(_MSC_VER)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <stdio.h>
+#endif
+
 #ifdef WANT_SIGINT_HANDLING
+#if defined(_MSC_VER)
+#else
 # include <sys/signal.h>
+#endif
 #endif
 
 #include "filewrapper.h"
@@ -122,12 +131,20 @@ ev_io_on_request(struct ev_loop* mainloop, ev_io* watcher, const int events)
     DBG("Could not accept() client: errno %d", errno);
     return;
   }
-
+  
+  #if defined(_MSC_VER)
+  unsigned long flags = 0 ? 1UL : 0UL;
+  if(ioctlsocket(client_fd, FIONBIO, &flags) == -1) {
+    DBG("Could not set_nonblocking() client %d: errno %d", client_fd, errno);
+    return;
+  }
+  #else
   int flags = fcntl(client_fd, F_GETFL, 0);
   if(fcntl(client_fd, F_SETFL, (flags < 0 ? 0 : flags) | O_NONBLOCK) == -1) {
     DBG("Could not set_nonblocking() client %d: errno %d", client_fd, errno);
     return;
   }
+  #endif
 
   GIL_LOCK(0);
 

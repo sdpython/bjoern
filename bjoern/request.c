@@ -51,7 +51,7 @@ void Request_clean(Request* request)
 {
   if(request->iterable) {
     /* Call 'iterable.close()' if available */
-    PyObject* close_method = PyObject_GetAttr(request->iterable, _close);
+    PyObject* close_method = PyObject_GetAttr(request->iterable, _pyclose);
     if(close_method == NULL) {
       if(PyErr_ExceptionMatches(PyExc_AttributeError))
         PyErr_Clear();
@@ -147,7 +147,11 @@ on_header_field(http_parser* parser, const char* field, size_t len)
     return 0;
   }
 
+  #if defined(_MSC_VER)
+  char * field_processed = _alloca(len);
+  #else
   char field_processed[len];
+  #endif
   for(size_t i=0; i<len; i++) {
     char c = field[i];
     if(c == '_') {
@@ -202,7 +206,7 @@ on_body(http_parser* parser, const char* data, const size_t len)
     _set_header_free_value(_wsgi_input, body);
   }
   PyObject *temp_data = _PEP3333_Bytes_FromStringAndSize(data, len);
-  PyObject *tmp = PyObject_CallMethodObjArgs(body, _write, temp_data, NULL);
+  PyObject *tmp = PyObject_CallMethodObjArgs(body, _pywrite, temp_data, NULL);
   Py_DECREF(tmp); /* Never throw away return objects from py-api */
   Py_DECREF(temp_data);
   return 0;
